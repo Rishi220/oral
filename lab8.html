@@ -1,0 +1,126 @@
+<html lang="en"></html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cat Selector</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            margin: 20px;
+        }
+        .input-group {
+            margin-bottom: 10px;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .input-group input[type="text"] {
+            width: calc(100% - 110px);
+            padding: 5px;
+            box-sizing: border-box;
+            display: inline-block;
+        }
+        .input-group button {
+            width: 100px;
+            display: inline-block;
+        }
+        .radio-group {
+            margin-bottom: 10px;
+        }
+        .radio-group label {
+            margin-right: 10px;
+        }
+        .button-group {
+            margin-bottom: 10px;
+        }
+        .results {
+            border: 1px solid green;
+            padding: 10px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="input-group">
+            <button onclick="displayAllNames()">All Names</button>
+        </div>
+        <div class="input-group">
+            <button onclick="displayHealthIssues()">Health Issues</button>
+            <input type="text" id="health-issues" placeholder="Health Issues">
+        </div>
+        <div class="radio-group">
+            <label><input type="radio" name="unit" value="imperial" checked> Imperial</label>
+            <label><input type="radio" name="unit" value="metric"> Metric</label>
+            <button onclick="displayWeights()">Weight</button>
+        </div>
+        <div class="button-group">
+            <button onclick="displayIntelligenceFriendly()">Intelligence - Friendly</button>
+        </div>
+        <div class="button-group">
+            <button onclick="displayAverageIntelligence()">Average Intelligence</button>
+        </div>
+        <div class="button-group">
+            <button onclick="displayAverageIntelligenceForChildFriendly()">Average Intelligence for Child Friendly = 4</button>
+        </div>
+        <div class="results" id="results">
+            &lt;--All Results should be displayed here--&gt;
+        </div>
+    </div>
+
+    <script>
+        const apiUrl = 'https://api.thecatapi.com/v1/breeds';
+
+        async function fetchData() {
+            const response = await fetch(apiUrl);
+            const data = await response.json();
+            return data;
+        }
+
+        async function displayAllNames() {
+            const data = await fetchData();
+            const names = data.map(cat => cat.name).join(', ');
+            document.getElementById('results').innerText = names;
+        }
+
+        async function displayHealthIssues() {
+            const data = await fetchData();
+            const healthIssue = document.getElementById('health-issues').value;
+            const filteredCats = data.filter(cat => cat.health_issues == healthIssue);
+            const names = filteredCats.map(cat => cat.name).join(', ');
+            document.getElementById('results').innerText = names;
+        }
+
+        async function displayWeights() {
+            const data = await fetchData();
+            const unit = document.querySelector('input[name="unit"]:checked').value;
+            const weights = data.map(cat => ${cat.name}: ${cat.weight[unit]}).join(', ');
+            document.getElementById('results').innerText = weights;
+        }
+
+        async function displayIntelligenceFriendly() {
+            const data = await fetchData();
+            const intelligenceFriendly = data.map(cat => ${cat.name} (I: ${cat.intelligence}, F: ${cat.child_friendly})).join(', ');
+            document.getElementById('results').innerText = intelligenceFriendly;
+        }
+
+        async function displayAverageIntelligence() {
+            const data = await fetchData();
+            const totalIntelligence = data.reduce((sum, cat) => sum + cat.intelligence, 0);
+            const averageIntelligence = (totalIntelligence / data.length).toFixed(2);
+            document.getElementById('results').innerText = Average Intelligence: ${averageIntelligence};
+        }
+
+        async function displayAverageIntelligenceForChildFriendly() {
+            const data = await fetchData();
+            const childFriendlyCats = data.filter(cat => cat.child_friendly >= 4);
+            const totalIntelligence = childFriendlyCats.reduce((sum, cat) => sum + cat.intelligence, 0);
+            const averageIntelligence = (totalIntelligence / childFriendlyCats.length).toFixed(2);
+            document.getElementById('results').innerText = Average Intelligence for Child Friendly: ${averageIntelligence};
+        }
+    </script>
+</body>
+</html>
